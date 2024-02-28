@@ -1,0 +1,49 @@
+on: push
+name: Check Assignment
+
+jobs:
+  check-allowed-files:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.9-slim
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Check Files
+      run: python check_allowed_files.py "hw-02.qmd" "hw-02.ipynb" "README.md" "data/*" "images/*" "check_allowed_files.py" "requirements.txt"
+
+  check-renders:
+    env:
+      GITHUB_PAT: ${{ secrets.GH_PAT }}
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.9-slim
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python and Quarto environment
+      run: |
+        apt-get update && apt-get install -y wget
+        wget -q -O quarto.deb https://github.com/quarto-dev/quarto-cli/releases/download/v1.1.189/quarto-1.1.189-linux-amd64.deb
+        dpkg -i quarto.deb
+        python -m pip install --upgrade pip
+    - name: Install Python dependencies
+      run: pip install -r requirements.txt
+    - name: Check if .qmd file exists
+      id: check_qmd
+      run: |
+        echo "QMD_EXISTS=false" >> $GITHUB_ENV
+        if [ -f hw-02.qmd ]; then
+          echo "QMD_EXISTS=true" >> $GITHUB_ENV
+        fi
+    - name: Render .qmd to HTML
+      if: env.QMD_EXISTS == 'true'
+      run: quarto render hw-02.qmd
+    - name: Render .ipynb to HTML
+      if: env.QMD_EXISTS == 'false'
+      run: quarto render hw-02.ipynb
+    - name: Create artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: hw-02-html
+        path: hw-02.html
