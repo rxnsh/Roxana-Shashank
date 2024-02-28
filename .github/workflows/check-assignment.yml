@@ -10,7 +10,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Check Files
-      run: python check_allowed_files.py "hw-02.qmd" "hw-02.ipynb" "README.md" "data/*" "images/*" "check_allowed_files.py" "requirements.txt"
+      run: python check_allowed_files.py "ex-06.qmd" "ex-06.ipynb" "README.md" "data/*" "images/*" "check_allowed_files.py" "requirements.txt"
 
   check-renders:
     env:
@@ -33,17 +33,17 @@ jobs:
       id: check_qmd
       run: |
         echo "QMD_EXISTS=false" >> $GITHUB_ENV
-        if [ -f hw-02.qmd ]; then
+        if [ -f ex-06.qmd ]; then
           echo "QMD_EXISTS=true" >> $GITHUB_ENV
         fi
     - name: Render .qmd to HTML
       if: env.QMD_EXISTS == 'true'
-      run: quarto render hw-02.qmd
+      run: quarto render ex-06.qmd
     - name: Render .ipynb to HTML
       if: env.QMD_EXISTS == 'false'
-      run: quarto render hw-02.ipynb
+      run: quarto render ex-06.ipynb
     - name: Create artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: hw-02-html
-        path: hw-02.html
+        name: ex-06-html
+        path: ex-06.html
